@@ -2,50 +2,68 @@
 #include <thread>
 #include <fstream>
 #include <mutex>
-using namespace std;
 
-mutex mtx;
+std::mutex mtx;
 
-void alpha(ofstream& outputFile) {
-  outputFile << "Thread A (ID " << this_thread::get_id() << ") created" << endl;
+void alpha(std::ofstream& outputFile) {
+  mtx.lock();
+  outputFile << "Thread A (ID " << std::this_thread::get_id() << ") created" << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  mtx.unlock();
+
   mtx.lock();
   for (size_t i = 0; i < 10; ++i) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     for (char j = 'A'; j <= 'Z'; ++j) {
       outputFile << j << " ";
     }
     outputFile << std::endl;
   }
   mtx.unlock();
-  outputFile << "Thread A (ID " << this_thread::get_id() << ") terminated" << endl;
+
+  mtx.lock();
+  outputFile << "Thread A (ID " << std::this_thread::get_id() << ") terminated" << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  mtx.unlock();
 }
 
-void number(ofstream& outputFile) {
-  outputFile << "Thread B (ID " << this_thread::get_id() << ") created" << endl;
+void number(std::ofstream& outputFile) {
+  mtx.lock();
+  outputFile << "Thread B (ID " << std::this_thread::get_id() << ") created" << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  mtx.unlock();
+
   mtx.lock();
   for (size_t i = 0; i < 10; ++i) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
     for (size_t j = 1; j <= 26; ++j) {
       outputFile << j << " ";
     }
     outputFile << std::endl;
   }
   mtx.unlock();
-  outputFile << "Thread B (ID " << this_thread::get_id() << ") terminated" << endl;
+
+  mtx.lock();
+  outputFile << "Thread B (ID " << std::this_thread::get_id() << ") terminated" << std::endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  mtx.unlock();
 }
 
 int main(int argc, char* argv[]) {
-  ofstream file("jvu.log");
+  std::ofstream file("jvu.log");
+  
   if (file.is_open()) {
-    file << "James Vu's Project 2 started" << endl;
+    file << "James Vu's Project 2 started" << std::endl;
 
-    thread A(alpha, ref(file));
-    thread B(number, ref(file));
+    std::thread A(alpha, ref(file));
+    std::thread B(number, ref(file));
 
     A.join();
     B.join();
 
-    file << "James Vu's Project 2 ended" << endl;
+    file << "James Vu's Project 2 ended" << std::endl;
     file.close();
-  } else { cout << "Could not open file" << endl; }
+  } else { std::cout << "Could not open file" << std::endl; }
 
   return 0;
 }
